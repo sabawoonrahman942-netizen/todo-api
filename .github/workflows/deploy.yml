@@ -1,27 +1,29 @@
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
-    branches: [ "master", "main" ]
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
 
 jobs:
-  build-and-test:
+  check-and-build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Repo kodunu indir (Checkout)
-      uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-    - name: Node.js ortamını kur
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-    - name: Bağımlılıkları yükle ve test et
-      run: |
-        npm install
-        npm test || echo "Test tanimlanmamis, devam ediliyor"
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Docker imajını test amaçlı build et
-      run: |
-        docker build -t todo-api:${{ github.sha }} .
+      - name: Check JavaScript syntax
+        run: npm run check
+
+      - name: Build Docker image
+        run: docker build -t todo-api:ci .

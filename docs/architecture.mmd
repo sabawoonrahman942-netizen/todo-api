@@ -1,0 +1,11 @@
+flowchart LR
+    Client[HTTP client] --> Express[Express app]
+    Express --> Health[Health endpoint]
+    Express --> TodoRoutes[Todo routes]
+    Express --> CategoryRoutes[Category routes]
+    TodoRoutes --> Validation[Input validation]
+    CategoryRoutes --> Validation
+    Validation --> Pool[PostgreSQL connection pool]
+    Pool --> Database[(PostgreSQL)]
+    Startup[Application startup] --> Migrator[Migration runner]
+    Migrator --> Database

@@ -1,0 +1,20 @@
+erDiagram
+    CATEGORIES ||--o{ TODOS : groups
+    CATEGORIES {
+        int id PK
+        string name UK
+        string color
+        datetime created_at
+        datetime updated_at
+    }
+    TODOS {
+        int id PK
+        string title
+        string description
+        string status
+        string priority
+        datetime due_at
+        int category_id FK
+        datetime created_at
+        datetime updated_at
+    }
