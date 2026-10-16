@@ -1,20 +1,17 @@
-# 1. Hangi resmi Node.js sürümünü baz alacağımızı belirtiyoruz
-FROM node:18-alpine
+FROM node:22-alpine
 
-# 2. Konteynerin içinde çalışacağımız ana dizini belirliyoruz
+ENV NODE_ENV=production
 WORKDIR /app
 
-# 3. Önce bağımlılık dosyalarını kopyalıyoruz (önbellekleme optimizasyonu için)
-COPY package*.json ./
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 
-# 4. Bağımlılıkları konteyner içine kuruyoruz
-RUN npm install
+COPY app.js ./
+COPY src ./src
+COPY migrations ./migrations
+COPY docs ./docs
 
-# 5. Projenin geri kalan tüm dosyalarını konteynere kopyalıyoruz
-COPY . .
-
-# 6. Uygulamanın dinleyeceği portu belirtiyoruz
+USER node
 EXPOSE 3000
 
-# 7. Konteyner ayağa kalktığında çalıştırılacak komut
-CMD ["node", "app.js"]
+CMD ["npm", "start"]
