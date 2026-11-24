@@ -1,13 +1,159 @@
 <!DOCTYPE html>
-<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Todo API</title></head><body>
-<h1>To-Do Uygulaması</h1><p id="health">Bağlantı kontrol ediliyor...</p>
-<form id="form"><label>Yeni görev: <input id="task" required></label> <button>Ekle</button></form>
-<h2>Görevler</h2><p id="message" role="status"></p><ul id="list"></ul>
-<script>
-const $=id=>document.getElementById(id);
-async function api(path,method='GET',body){const options={method};if(body!==undefined){options.headers={'Content-Type':'application/json'};options.body=JSON.stringify(body);}const r=await fetch(path,options);if(!r.ok)throw Error('HTTP '+r.status);return r.status===204?null:r.json();}
-async function run(fn){try{$('message').textContent='';await fn();}catch(e){$('message').textContent=e.message;}}
-async function load(){const rows=await api('/todos');$('list').replaceChildren();for(const t of rows){const li=document.createElement('li');li.append(document.createTextNode((t.done?'✓ ':'☐ ')+t.task+' '));const toggle=document.createElement('button');toggle.textContent=t.done?'Geri al':'Tamamla';toggle.onclick=()=>run(async()=>{await api('/todos/'+t.id,'PATCH',{done:!t.done});await load();});const del=document.createElement('button');del.textContent='Sil';del.onclick=()=>run(async()=>{await api('/todos/'+t.id,'DELETE');await load();});li.append(toggle,' ',del);$('list').append(li);}$('message').textContent='Toplam görev: '+rows.length;}
-$('form').onsubmit=e=>{e.preventDefault();run(async()=>{await api('/todos','POST',{task:$('task').value});$('task').value='';await load();});};
-api('/health').then(()=>{$('health').textContent='API çalışıyor.';}).catch(()=>{$('health').textContent='API bağlantısı yok.';});run(load);
-</script></body></html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Todo API</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            margin: 50px auto;
+            padding: 30px;
+            max-width: 800px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            font-size: 32px;
+        }
+
+        #health {
+            background: #dcfce7;
+            color: #166534;
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px #00000008;
+        }
+
+        form label {
+            flex: 1;
+        }
+
+        input {
+            width: 100%;
+            margin-top: 8px;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: 2px solid #2563eb;
+        }
+
+        button {
+            border: none;
+            padding: 12px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        form button {
+            background: #2563eb;
+            color: white;
+            align-self: flex-end;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        h2 {
+            margin-top: 35px;
+        }
+
+        #message {
+            color: #64748b;
+        }
+
+        #list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #list li {
+            background: white;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            border-left: 4px solid #2563eb;
+            box-shadow: 0 3px 10px #00000008;
+            overflow-wrap: anywhere;
+        }
+
+        #list button {
+            margin: 5px;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        #list button:last-child {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            margin-top: 40px;
+            font-size: 13px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h1>To-Do Uygulaması</h1>
+
+    <p id="health">Bağlantı kontrol ediliyor...</p>
+
+    <form id="form">
+        <label>Yeni görev:
+            <input id="task" placeholder="Yeni görev yaz..." required>
+        </label>
+        <button>Ekle</button>
+    </form>
+
+    <h2>Görevler</h2>
+    <p id="message" role="status"></p>
+    <ul id="list"></ul>
+
+    <footer>Flask • SQLite • Docker</footer>
+
+    <script>
+        const $ = id => document.getElementById(id);
+        async function api(path, method = 'GET', body) { const options = { method }; if (body !== undefined) { options.headers = { 'Content-Type': 'application/json' }; options.body = JSON.stringify(body); } const r = await fetch(path, options); if (!r.ok) throw Error('HTTP ' + r.status); return r.status === 204 ? null : r.json(); }
+        async function run(fn) { try { $('message').textContent = ''; await fn(); } catch (e) { $('message').textContent = e.message; } }
+        async function load() { const rows = await api('/todos'); $('list').replaceChildren(); for (const t of rows) { const li = document.createElement('li'); li.append(document.createTextNode((t.done ? '✓ ' : '☐ ') + t.task + ' ')); const toggle = document.createElement('button'); toggle.textContent = t.done ? 'Geri al' : 'Tamamla'; toggle.onclick = () => run(async () => { await api('/todos/' + t.id, 'PATCH', { done: !t.done }); await load(); }); const del = document.createElement('button'); del.textContent = 'Sil'; del.onclick = () => run(async () => { await api('/todos/' + t.id, 'DELETE'); await load(); }); li.append(toggle, ' ', del); $('list').append(li); } $('message').textContent = 'Toplam görev: ' + rows.length; }
+        $('form').onsubmit = e => { e.preventDefault(); run(async () => { await api('/todos', 'POST', { task: $('task').value }); $('task').value = ''; await load(); }); };
+        api('/health').then(() => { $('health').textContent = 'API çalışıyor.'; }).catch(() => { $('health').textContent = 'API bağlantısı yok.'; }); run(load);
+    </script>
+
+</body>
+
+</html>
