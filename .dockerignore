@@ -1,9 +1,5 @@
 .git
-.github
+__pycache__
+*.db
 .env
-.env.*
-!.env.example
-node_modules
-npm-debug.log
-README.md
-coverage
+.venv

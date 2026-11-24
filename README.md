@@ -1,135 +1,20 @@
-# To-Do API
+# Todo API — Staj defterine uyarlanmış demo
 
-PostgreSQL üzerinde görev ve kategori saklayan, Node.js ve Express ile hazırlanmış REST API.
+Bu dal, staj defterinde anlatılan Flask/Gunicorn ve 5000 portu mimarisinin sonradan oluşturulan demo sürümüdür. Orijinal staj çalışmasının birebir kopyası değildir. ER diyagramındaki id, task, done alanları için SQLite seçilmiştir; defterde veritabanı motoru belirtilmemiştir. Master dalındaki Node.js/PostgreSQL uygulaması korunmuştur.
 
-## Özellikler
+## Yerel çalışma
 
-- Görevler için oluşturma, listeleme, tek kayıt görüntüleme, güncelleme ve silme
-- Kategoriler için CRUD uç noktaları
-- Görev durumu, öncelik, son tarih ve kategori ilişkisi
-- Durum ve kategori filtresi ile limit/offset sayfalama
-- Parametreli SQL sorguları ve istek doğrulama
-- Docker Compose ile API ve PostgreSQL'i birlikte başlatma
+Docker Desktop açıkken:
+```sh
+docker compose up --build -d
+docker compose ps
+```
+Tarayıcı: http://localhost:5000
+API: GET /health, GET /todos, POST /todos, PATCH /todos/{id}, DELETE /todos/{id}.
+HTML arayüzü görev ekler, listeler, tamamlar ve siler.
 
-## Teknolojiler
+## CI/CD
+GitHub Actions Python testlerini ve Docker build işlemini çalıştırır. Jenkinsfile Ubuntu üzerinde Docker Compose ve curl erişimi olan bir Jenkins agent gerektirir. Jenkins kurulumu, GitHub tetikleyicisi ve gerçek dağıtım ayrıca doğrulanmalıdır.
 
-- Node.js 22
-- Express 5
-- PostgreSQL 16
-- Docker Compose
-- GitHub Actions
-
-## Hızlı başlangıç: Docker
-
-Docker Desktop veya Docker Engine kurulu olmalı. Proje klasöründe:
-
-~~~powershell
-Copy-Item .env.example .env
-docker compose up --build
-~~~
-
-API, http://localhost:3000 adresinde; PostgreSQL ise localhost:5432 adresinde çalışır. API başlamadan önce veritabanı sağlık kontrolünden geçer ve gerekli tablolar oluşturulur.
-
-Kontrol:
-
-~~~bash
-curl http://localhost:3000/health
-~~~
-
-Beklenen yanıt:
-
-~~~json
-{
-  "status": "ok",
-  "database": "ok"
-}
-~~~
-
-## Yerel geliştirme
-
-Node.js 22 ve PostgreSQL 16 gerekir. Önce örnek ortam dosyasını oluşturup veritabanını Docker ile başlatın:
-
-~~~powershell
-Copy-Item .env.example .env
-docker compose up -d db
-npm ci
-npm run dev
-~~~
-
-Geliştirme sunucusu http://localhost:3000 adresinde başlar. npm start normal sunucuyu başlatır. Gerekli tablolar API başlangıcında otomatik oluşturulur.
-
-.env.example içindeki parolalar yalnızca yerel geliştirme içindir. Gerçek ortamda güçlü sırlar kullanın ve .env dosyasını Git'e eklemeyin.
-
-## Veri modeli
-
-Bir kategori birçok göreve sahip olabilir. Kategori silinirse ona bağlı görevler silinmez; category_id alanları NULL olur.
-
-Tablo yapısı: [schema.sql](schema.sql).
-
-## API dokümantasyonu
-
-### Uç noktalar
-
-| Method | Path | Açıklama |
-|---|---|---|
-| GET | /health | API ve veritabanı sağlık kontrolü |
-| GET | /api/v1/todos | Görevleri listele |
-| POST | /api/v1/todos | Görev oluştur |
-| GET | /api/v1/todos/{id} | Görevi getir |
-| PATCH | /api/v1/todos/{id} | Görev alanlarını güncelle |
-| DELETE | /api/v1/todos/{id} | Görevi sil |
-| GET | /api/v1/categories | Kategorileri listele |
-| POST | /api/v1/categories | Kategori oluştur |
-| GET | /api/v1/categories/{id} | Kategoriyi getir |
-| PATCH | /api/v1/categories/{id} | Kategoriyi güncelle |
-| DELETE | /api/v1/categories/{id} | Kategoriyi sil |
-
-Görev durumları pending, in_progress, completed; öncelikler low, normal, high, urgent değerlerini alır. Listeleme varsayılan olarak 20 kayıt döndürür; limit 1–100, offset sıfır veya daha büyük olabilir. İsteğe bağlı olarak status ve category_id ile filtrelenebilir.
-
-### Örnek istekler
-
-Kategori oluştur:
-
-~~~bash
-curl -X POST http://localhost:3000/api/v1/categories \
-  -H "Content-Type: application/json" \
-  -d '{"name":"İş","color":"#2563EB"}'
-~~~
-
-Görev oluştur:
-
-~~~bash
-curl -X POST http://localhost:3000/api/v1/todos \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Dokümantasyonu tamamla","description":"README ve API şemasını gözden geçir","priority":"high","category_id":1,"due_at":"2026-12-01T17:00:00Z"}'
-~~~
-
-Tamamlanmamış görevleri sayfalayarak listele:
-
-~~~bash
-curl "http://localhost:3000/api/v1/todos?status=pending&limit=20&offset=0"
-~~~
-
-Görev yanıtları data, liste yanıtları ayrıca pagination alanı taşır. Hatalar error.code ve error.message içeren tek biçimli JSON döndürür.
-
-## Proje yapısı
-
-~~~text
-app.js
-src/
-  app.js
-  config.js
-  server.js
-  db/
-  routes/
-  utils/
-schema.sql
-docker-compose.yml
-~~~
-
-## Geliştirme ve sınırlar
-
-- npm run check JavaScript dosyalarının sözdizimini kontrol eder.
-- GitHub Actions, sözdizimi kontrolünü çalıştırır ve Docker imajını derler.
-- Otomatik API/veritabanı testleri henüz eklenmemiştir.
-- Kimlik doğrulama ve kullanıcı bazlı erişim yoktur; bu sürüm tek ve ortak bir görev alanı olarak çalışır. İnternete açık üretim ortamında kullanmadan önce kimlik doğrulama ve yetkilendirme ekleyin.
+## Zabbix
+Zabbix Server ve Agent kurulmuş bir Ubuntu devopsserver ortamında Linux agent şablonunu bağlayın. Zabbix Server konteyneri kullanılıyorsa todo-staj-network ağına katılmalıdır. Host altında Simple check item: net.tcp.service[,todo-api,5000], interval 1m, numeric unsigned. Trigger: last(/devopsserver/net.tcp.service[,todo-api,5000])=0, High, Todo API is DOWN. Sunucu farklı bir ağdaysa erişilebilir servis adresi kullanın. SMTP: smtp.gmail.com, 587, STARTTLS; kimlik bilgilerini Zabbix UI üzerinden girin, Git'e koymayın. Trigger action ve kullanıcı media ayarını yapılandırın. docker compose stop todo-api ile kontrollü kesinti, docker compose start todo-api ile kurtarma test edilir. Zabbix ve SMTP bu depoda kurulmuş veya test edilmiş değildir.

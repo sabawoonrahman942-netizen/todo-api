@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Todo API</title></head><body>
+<h1>To-Do Uygulaması</h1><p id="health">Bağlantı kontrol ediliyor...</p>
+<form id="form"><label>Yeni görev: <input id="task" required></label> <button>Ekle</button></form>
+<h2>Görevler</h2><p id="message" role="status"></p><ul id="list"></ul>
+<script>
+const $=id=>document.getElementById(id);
+async function api(path,method='GET',body){const options={method};if(body!==undefined){options.headers={'Content-Type':'application/json'};options.body=JSON.stringify(body);}const r=await fetch(path,options);if(!r.ok)throw Error('HTTP '+r.status);return r.status===204?null:r.json();}
+async function run(fn){try{$('message').textContent='';await fn();}catch(e){$('message').textContent=e.message;}}
+async function load(){const rows=await api('/todos');$('list').replaceChildren();for(const t of rows){const li=document.createElement('li');li.append(document.createTextNode((t.done?'✓ ':'☐ ')+t.task+' '));const toggle=document.createElement('button');toggle.textContent=t.done?'Geri al':'Tamamla';toggle.onclick=()=>run(async()=>{await api('/todos/'+t.id,'PATCH',{done:!t.done});await load();});const del=document.createElement('button');del.textContent='Sil';del.onclick=()=>run(async()=>{await api('/todos/'+t.id,'DELETE');await load();});li.append(toggle,' ',del);$('list').append(li);}$('message').textContent='Toplam görev: '+rows.length;}
+$('form').onsubmit=e=>{e.preventDefault();run(async()=>{await api('/todos','POST',{task:$('task').value});$('task').value='';await load();});};
+api('/health').then(()=>{$('health').textContent='API çalışıyor.';}).catch(()=>{$('health').textContent='API bağlantısı yok.';});run(load);
+</script></body></html>
