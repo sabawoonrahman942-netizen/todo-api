@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('node:path');
 const createTodosRouter = require('./routes/todos');
 const createCategoriesRouter = require('./routes/categories');
 
@@ -9,6 +10,10 @@ function createApp(pool) {
   app.use(express.json({ limit: '1mb' }));
 
   app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
+  });
+
+  app.get('/api', (req, res) => {
     res.json({
       name: 'To-Do API',
       version: '2.0.0',
