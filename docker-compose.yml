@@ -4,12 +4,15 @@ services:
     ports:
       - "127.0.0.1:5000:5000"
     volumes:
-      - todo-data:/data
+      - type: bind
+        source: ${TODO_DATA_DIR:-C:/Users/HP/Desktop/TodoData}
+        target: /data
+        bind:
+          create_host_path: false
     restart: unless-stopped
     networks:
       - devops
-volumes:
-  todo-data:
+
 networks:
   devops:
     name: todo-staj-network
