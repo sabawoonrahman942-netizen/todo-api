@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    options { disableConcurrentBuilds() }
+    options { disableConcurrentBuilds(); skipDefaultCheckout() }
     stages {
         stage('CI - Kaynak kod') {
             steps {
@@ -10,12 +10,20 @@ pipeline {
         }
         stage('CD - Docker') {
             steps {
-                sh 'docker compose up --build -d'
+                sh 'docker compose -p todo-api up --build -d'
             }
         }
         stage('Servis kontrolü') {
             steps {
-                sh 'curl --retry 10 --retry-connrefused --retry-delay 2 --fail http://localhost:5000/health'
+                sh '''
+                    for i in $(seq 1 15); do
+                        if docker compose -p todo-api exec -T todo-api python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3).read().decode())"; then
+                            exit 0
+                        fi
+                        sleep 2
+                    done
+                    exit 1
+                '''
             }
         }
     }
