@@ -9,9 +9,7 @@ PostgreSQL üzerinde görev ve kategori saklayan, Node.js ve Express ile hazırl
 - Görev durumu, öncelik, son tarih ve kategori ilişkisi
 - Durum ve kategori filtresi ile limit/offset sayfalama
 - Parametreli SQL sorguları ve istek doğrulama
-- Başlangıçta otomatik çalışan, takip edilen veritabanı migration'ları
 - Docker Compose ile API ve PostgreSQL'i birlikte başlatma
-- OpenAPI tanımı ve Mermaid ER diyagramı
 
 ## Teknolojiler
 
@@ -30,7 +28,7 @@ Copy-Item .env.example .env
 docker compose up --build
 ~~~
 
-API, http://localhost:3000 adresinde; PostgreSQL ise localhost:5432 adresinde çalışır. API başlamadan önce veritabanı sağlık kontrolünden geçer ve bekleyen migration'lar uygulanır.
+API, http://localhost:3000 adresinde; PostgreSQL ise localhost:5432 adresinde çalışır. API başlamadan önce veritabanı sağlık kontrolünden geçer ve gerekli tablolar oluşturulur.
 
 Kontrol:
 
@@ -55,11 +53,10 @@ Node.js 22 ve PostgreSQL 16 gerekir. Önce örnek ortam dosyasını oluşturup v
 Copy-Item .env.example .env
 docker compose up -d db
 npm ci
-npm run db:migrate
 npm run dev
 ~~~
 
-Geliştirme sunucusu http://localhost:3000 adresinde başlar. npm start normal sunucuyu başlatır. npm run db:migrate migration'ları elle uygulamak içindir; API başlangıcında da otomatik çalışırlar.
+Geliştirme sunucusu http://localhost:3000 adresinde başlar. npm start normal sunucuyu başlatır. Gerekli tablolar API başlangıcında otomatik oluşturulur.
 
 .env.example içindeki parolalar yalnızca yerel geliştirme içindir. Gerçek ortamda güçlü sırlar kullanın ve .env dosyasını Git'e eklemeyin.
 
@@ -67,34 +64,9 @@ Geliştirme sunucusu http://localhost:3000 adresinde başlar. npm start normal s
 
 Bir kategori birçok göreve sahip olabilir. Kategori silinirse ona bağlı görevler silinmez; category_id alanları NULL olur.
 
-~~~mermaid
-erDiagram
-    CATEGORIES ||--o{ TODOS : groups
-    CATEGORIES {
-        int id PK
-        string name UK
-        string color
-        datetime created_at
-        datetime updated_at
-    }
-    TODOS {
-        int id PK
-        string title
-        string description
-        string status
-        string priority
-        datetime due_at
-        int category_id FK
-        datetime created_at
-        datetime updated_at
-    }
-~~~
-
-Ayrı diyagram dosyaları: [ER diyagramı](docs/erd.mmd) ve [uygulama mimarisi](docs/architecture.mmd). Migration: [migrations/001_create_categories_and_todos.sql](migrations/001_create_categories_and_todos.sql).
+Tablo yapısı: [schema.sql](schema.sql).
 
 ## API dokümantasyonu
-
-OpenAPI 3.0 tanımı [docs/openapi.yaml](docs/openapi.yaml) dosyasındadır ve çalışan sunucuda http://localhost:3000/docs/openapi.yaml adresinden alınabilir.
 
 ### Uç noktalar
 
@@ -151,8 +123,7 @@ src/
   db/
   routes/
   utils/
-migrations/
-docs/
+schema.sql
 docker-compose.yml
 ~~~
 

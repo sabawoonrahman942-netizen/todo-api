@@ -1,6 +1,4 @@
 const express = require('express');
-const fs = require('node:fs');
-const path = require('node:path');
 const createTodosRouter = require('./routes/todos');
 const createCategoriesRouter = require('./routes/categories');
 
@@ -14,14 +12,8 @@ function createApp(pool) {
     res.json({
       name: 'To-Do API',
       version: '2.0.0',
-      documentation: '/docs/openapi.yaml',
       health: '/health'
     });
-  });
-
-  app.get('/docs/openapi.yaml', (req, res) => {
-    const specPath = path.join(__dirname, '..', 'docs', 'openapi.yaml');
-    res.type('application/yaml').send(fs.readFileSync(specPath, 'utf8'));
   });
 
   app.get('/health', async (req, res) => {

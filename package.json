@@ -7,8 +7,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "node --watch app.js",
-    "db:migrate": "node scripts/migrate.js",
-    "check": "node --check app.js && node --check src/app.js && node --check src/server.js && node --check src/config.js && node --check src/db/pool.js && node --check src/db/migrate.js && node --check src/routes/todos.js && node --check src/routes/categories.js && node --check src/utils/validation.js && node --check scripts/migrate.js"
+    "check": "node --check app.js && node --check src/app.js && node --check src/server.js && node --check src/config.js && node --check src/db/pool.js && node --check src/routes/todos.js && node --check src/routes/categories.js && node --check src/utils/validation.js"
   },
   "dependencies": {
     "dotenv": "^16.6.1",

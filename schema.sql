@@ -1,4 +1,4 @@
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
   id SERIAL PRIMARY KEY,
   name VARCHAR(80) NOT NULL,
   color VARCHAR(7),
@@ -8,10 +8,10 @@ CREATE TABLE categories (
     CHECK (color IS NULL OR color ~ '^#[0-9A-Fa-f]{6}$')
 );
 
-CREATE UNIQUE INDEX categories_name_case_insensitive_idx
+CREATE UNIQUE INDEX IF NOT EXISTS categories_name_case_insensitive_idx
   ON categories (LOWER(name));
 
-CREATE TABLE todos (
+CREATE TABLE IF NOT EXISTS todos (
   id SERIAL PRIMARY KEY,
   title VARCHAR(200) NOT NULL,
   description TEXT NOT NULL DEFAULT '',
@@ -26,6 +26,6 @@ CREATE TABLE todos (
   CONSTRAINT todos_priority_allowed CHECK (priority IN ('low', 'normal', 'high', 'urgent'))
 );
 
-CREATE INDEX todos_status_created_at_idx ON todos (status, created_at DESC);
-CREATE INDEX todos_category_id_idx ON todos (category_id);
-CREATE INDEX todos_due_at_idx ON todos (due_at) WHERE due_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS todos_status_created_at_idx ON todos (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS todos_category_id_idx ON todos (category_id);
+CREATE INDEX IF NOT EXISTS todos_due_at_idx ON todos (due_at) WHERE due_at IS NOT NULL;

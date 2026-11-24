@@ -1,10 +1,11 @@
 const config = require('./config');
 const pool = require('./db/pool');
-const { runMigrations } = require('./db/migrate');
+const fs = require('node:fs');
+const path = require('node:path');
 const { createApp } = require('./app');
 
 async function start() {
-  await runMigrations(pool);
+  await pool.query(fs.readFileSync(path.join(__dirname, '..', 'schema.sql'), 'utf8'));
 
   const app = createApp(pool);
   const server = app.listen(config.port, '0.0.0.0', () => {

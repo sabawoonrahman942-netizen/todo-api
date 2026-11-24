@@ -8,8 +8,7 @@ RUN npm ci --omit=dev
 
 COPY app.js ./
 COPY src ./src
-COPY migrations ./migrations
-COPY docs ./docs
+COPY schema.sql ./
 
 USER node
 EXPOSE 3000
